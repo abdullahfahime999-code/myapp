@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>مدیریت محصولات</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #f0f2f5; 
+            padding: 10px; 
+            color: #333; 
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        /* ===== Header ===== */
+        .header { 
+            background: linear-gradient(135deg, #0E8A4D, #38C172); 
+            color: white; 
+            padding: 14px 18px; 
+            border-radius: 14px; 
+            margin-bottom: 16px; 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            gap: 10px;
+            box-shadow: 0 4px 20px rgba(14, 138, 77, 0.3); 
+        }
+        .header h1 { font-size: 18px; font-weight: 700; }
+        .header .stats { 
+            display: flex; 
+            gap: 12px; 
+            font-size: 12px; 
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .header .stats span { 
+            background: rgba(255, 255, 255, 0.2); 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            font-size: 11px;
+            white-space: nowrap;
+        }
+        
+        /* ===== Form Card ===== */
+        .form-card { 
+            background: white; 
+            padding: 16px; 
+            border-radius: 14px; 
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); 
+            margin-bottom: 16px; 
+        }
+        .form-card h2 { 
+            font-size: 16px; 
+            margin-bottom: 14px; 
+            color: #0E8A4D; 
+            border-bottom: 2px solid #e8f5e9; 
+            padding-bottom: 10px; 
+        }
+        .form-row { 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 12px; 
+            margin-bottom: 12px; 
+        }
+        @media (min-width: 600px) {
+            .form-row { grid-template-columns: 1fr 1fr; }
+        }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { 
+            font-size: 12px; 
+            font-weight: 600; 
+            margin-bottom: 4px; 
+            color: #555; 
+        }
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea { 
+            padding: 10px 12px; 
+            border: 2px solid #e0e0e0; 
+            border-radius: 10px; 
+            font-size: 14px; 
+            transition: all 0.3s; 
+            font-family: inherit; 
+            background: #fafafa;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .form-group input:focus, 
+        .form-group select:focus, 
+        .form-group textarea:focus { 
+            border-color: #0E8A4D; 
+            outline: none; 
+            box-shadow: 0 0 0 3px rgba(14, 138, 77, 0.15); 
+        }
+        .form-group textarea { 
+            resize: vertical; 
+            min-height: 60px; 
+        }
+        .select-wrapper { position: relative; }
+        .select-wrapper select { 
+            width: 100%; 
+            padding: 10px 12px; 
+            padding-left: 36px;
+            border: 2px solid #e0e0e0; 
+            border-radius: 10px; 
+            font-size: 14px; 
+            background: #fafafa; 
+            cursor: pointer; 
+            appearance: none; 
+            -webkit-appearance: none; 
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23555' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); 
+            background-repeat: no-repeat; 
+            background-position: left 12px center; 
+        }
+        .select-wrapper select:focus { 
+            border-color: #0E8A4D; 
+            outline: none; 
+            box-shadow: 0 0 0 3px rgba(14, 138, 77, 0.15); 
+        }
+        
+        /* ===== Buttons ===== */
+        .btn { 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 10px; 
+            font-size: 14px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            width: 100%;
+            touch-action: manipulation;
+        }
+        @media (min-width: 500px) {
+            .btn { width: auto; }
+        }
+        .btn-primary { background: #0E8A4D; color: white; }
+        .btn-primary:hover { background: #0a6d3d; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(14, 138, 77, 0.3); }
+        .btn-primary:active { transform: scale(0.97); }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-danger:hover { background: #c0392b; }
+        .btn-warning { background: #f39c12; color: white; }
+        .btn-warning:hover { background: #d68910; }
+        .btn-sm { 
+            padding: 6px 12px; 
+            font-size: 11px; 
+            border-radius: 8px; 
+            width: auto;
+        }
+        .btn-group { 
+            display: flex; 
+            gap: 6px; 
+            flex-wrap: wrap; 
+            justify-content: center;
+        }
+        @media (min-width: 500px) {
+            .btn-group { justify-content: flex-start; }
+        }
+        
+        /* ===== Filter ===== */
+        .filter-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 12px;
+            background: #f8fdf9;
+            border-radius: 12px;
+            border: 1px solid #e8f5e9;
+            margin-bottom: 12px;
+        }
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            flex: 1;
+            min-width: 100%;
+        }
+        @media (min-width: 500px) {
+            .filter-group { min-width: 200px; }
+        }
+        .filter-group .filter-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #0E8A4D;
+            margin-left: 4px;
+            min-width: 50px;
+        }
+        .filter-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            padding: 4px 8px;
+            background: white;
+            border-radius: 20px;
+            border: 1.5px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 11px;
+            touch-action: manipulation;
+        }
+        .filter-checkbox:hover { border-color: #0E8A4D; }
+        .filter-checkbox.active { border-color: #0E8A4D; background: #e8f5e9; }
+        .filter-checkbox input[type="checkbox"] { 
+            width: 14px; 
+            height: 14px; 
+            cursor: pointer; 
+            accent-color: #0E8A4D; 
+            flex-shrink: 0;
+        }
+        .filter-checkbox label { 
+            font-size: 11px; 
+            font-weight: 500; 
+            color: #333; 
+            cursor: pointer; 
+            margin: 0; 
+        }
+        
+        /* ===== Table ===== */
+        .table-container { 
+            background: white; 
+            border-radius: 14px; 
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); 
+            overflow: hidden; 
+        }
+        .table-container .table-header { 
+            padding: 12px 14px; 
+            background: #f8f9fa; 
+            border-bottom: 2px solid #e8f5e9; 
+            display: flex; 
+            flex-direction: column;
+            gap: 8px;
+            align-items: stretch;
+        }
+        @media (min-width: 500px) {
+            .table-container .table-header { 
+                flex-direction: row; 
+                align-items: center; 
+                justify-content: space-between;
+            }
+        }
+        .table-container .table-header span { 
+            font-weight: 700; 
+            color: #0E8A4D; 
+            font-size: 14px;
+            text-align: center;
+        }
+        .table-container .table-header input { 
+            padding: 8px 12px; 
+            border: 2px solid #e0e0e0; 
+            border-radius: 10px; 
+            font-size: 14px; 
+            width: 100%;
+        }
+        @media (min-width: 500px) {
+            .table-container .table-header input { width: 200px; }
+        }
+        .table-container .table-header input:focus { 
+            border-color: #0E8A4D; 
+            outline: none; 
+        }
+        
+        /* ===== Table Scroll ===== */
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            font-size: 12px;
+            min-width: 500px;
+        }
+        th { 
+            background: #f8f9fa; 
+            padding: 10px 10px; 
+            text-align: right; 
+            font-size: 11px; 
+            font-weight: 700; 
+            color: #555; 
+            border-bottom: 2px solid #e8f5e9; 
+            white-space: nowrap;
+        }
+        td { 
+            padding: 10px 10px; 
+            border-bottom: 1px solid #f0f0f0; 
+            font-size: 12px; 
+            vertical-align: middle; 
+        }
+        tr:hover { background: #f8fdf9; }
+        
+        .status-badge { 
+            padding: 3px 10px; 
+            border-radius: 20px; 
+            font-size: 10px; 
+            font-weight: 600; 
+            white-space: nowrap;
+        }
+        .status-badge.active { background: #e8f5e9; color: #0E8A4D; }
+        .status-badge.inactive { background: #fce4ec; color: #e74c3c; }
+        
+        /* ===== Modal ===== */
+        .modal-overlay { 
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; right: 0; bottom: 0; 
+            background: rgba(0, 0, 0, 0.5); 
+            z-index: 1000; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 20px;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.show { display: flex; }
+        .modal { 
+            background: white; 
+            border-radius: 20px; 
+            padding: 24px; 
+            max-width: 400px; 
+            width: 100%; 
+            max-height: 90vh; 
+            overflow-y: auto; 
+            animation: modalSlide 0.3s ease; 
+        }
+        @keyframes modalSlide { 
+            from { transform: translateY(-30px) scale(0.95); opacity: 0; } 
+            to { transform: translateY(0) scale(1); opacity: 1; } 
+        }
+        .modal h3 { 
+            font-size: 18px; 
+            margin-bottom: 16px; 
+            color: #0E8A4D; 
+        }
+        .modal .close-btn { 
+            float: left; 
+            background: none; 
+            border: none; 
+            font-size: 24px; 
+            cursor: pointer; 
+            color: #999; 
+            padding: 0 8px;
+        }
+        .modal .close-btn:hover { color: #333; }
+        .modal .btn-group { justify-content: center; }
+        
+        /* ===== Toast ===== */
+        .toast { 
+            position: fixed; 
+            bottom: 20px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            padding: 12px 20px; 
+            border-radius: 12px; 
+            color: white; 
+            font-weight: 600; 
+            z-index: 2000; 
+            display: none; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); 
+            font-size: 13px;
+            max-width: 90%;
+            text-align: center;
+        }
+        .toast.success { background: #0E8A4D; }
+        .toast.error { background: #e74c3c; }
+        .toast.show { 
+            display: block; 
+            animation: toastIn 0.5s ease; 
+        }
+        @keyframes toastIn { 
+            from { transform: translateX(-50%) translateY(20px); opacity: 0; } 
+            to { transform: translateX(-50%) translateY(0); opacity: 1; } 
+        }
+        
+        /* ===== Empty & Loading ===== */
+        .empty-state { text-align: center; padding: 40px 20px; color: #999; }
+        .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+        .empty-state h3 { color: #555; margin-bottom: 6px; font-size: 16px; }
+        .empty-state p { font-size: 13px; }
+        .loading { text-align: center; padding: 40px; color: #999; }
+        .loading .spinner { 
+            display: inline-block; 
+            width: 36px; 
+            height: 36px; 
+            border: 4px solid #e0e0e0; 
+            border-top: 4px solid #0E8A4D; 
+            border-radius: 50%; 
+            animation: spin 1s linear infinite; 
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* ===== Touch Optimizations ===== */
+        button, .filter-checkbox, .btn, .btn-sm {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            min-height: 44px;
+        }
+        .btn-sm { min-height: 32px; }
+        input, select, textarea {
+            font-size: 16px !important; /* جلوگیری از زوم آیفون */
+        }
+        @media (max-width: 400px) {
+            body { padding: 6px; }
+            .header { padding: 12px 14px; }
+            .header h1 { font-size: 16px; }
+            .form-card { padding: 12px; }
+            .filter-checkbox { padding: 3px 6px; font-size: 10px; }
+            .filter-checkbox label { font-size: 10px; }
+            td, th { padding: 6px 6px; font-size: 10px; }
+            .btn-sm { font-size: 10px; padding: 4px 8px; }
+            .status-badge { font-size: 9px; padding: 2px 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📦 مدیریت محصولات</h1>
+            <div class="stats">
+                <span id="totalProducts">{{ products|length }} محصول</span>
+                <span id="activeProducts">
+                    {% set active_count = 0 %}
+                    {% for p in products %}
+                        {% if p.is_active == 1 %}
+                            {% set active_count = active_count + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ active_count }} فعال
+                </span>
+            </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="form-card" id="formCard">
+            <h2 id="formTitle">➕ افزودن محصول جدید</h2>
+            <form id="productForm">
+                <input type="hidden" id="productId" name="id">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>نام محصول *</label>
+                        <div class="select-wrapper">
+                            <select id="name" name="name" required>
+                                <option value="بسته انترنت افغانستان">📶 بسته انترنت افغانستان</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>قیمت (تومان) *</label>
+                        <input type="number" id="price" name="price" required placeholder="مثال: 10000" min="0" step="0.01">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>اپراتور</label>
+                        <div class="select-wrapper">
+                            <select id="operator" name="operator">
+                                <option value="">— انتخاب اپراتور —</option>
+                                <option value="افغان بیسیم">📡 افغان بیسیم</option>
+                                <option value="روشن">📡 روشن</option>
+                                <option value="اتصالات">📡 اتصالات</option>
+                                <option value="اتوما">📡 اتوما</option>
+                                <option value="سلام">📡 سلام</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>وضعیت</label>
+                        <select id="is_active" name="is_active">
+                            <option value="1">✅ فعال</option>
+                            <option value="0">❌ غیرفعال</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>توضیحات</label>
+                        <textarea id="description" name="description" placeholder="توضیحات محصول را وارد کنید..."></textarea>
+                    </div>
+                </div>
+
+                <div class="btn-group" style="margin-top: 12px;">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">➕ افزودن محصول</button>
+                    <button type="button" class="btn btn-warning" id="cancelBtn" style="display:none;" onclick="resetForm()">❌ انصراف</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+            <div class="table-header">
+                <span>📋 لیست محصولات</span>
+                <input type="text" id="searchInput" placeholder="🔍 جستجوی محصول..." onkeyup="applyFilters()">
+            </div>
+            
+            <!-- Filter -->
+            <div class="filter-container" id="filterContainer">
+                <div class="filter-group" id="filterOperatorGroup">
+                    <span class="filter-label">📡 اپراتور:</span>
+                    <div class="filter-checkbox active" onclick="toggleOperatorFilter(this, 'all')">
+                        <input type="checkbox" checked id="filter_operator_all" onchange="applyFilters()">
+                        <label for="filter_operator_all">📋 همه</label>
+                    </div>
+                    <div class="filter-checkbox" onclick="toggleOperatorFilter(this, 'افغان بیسیم')">
+                        <input type="checkbox" id="filter_operator_افغان_بیسیم" onchange="applyFilters()">
+                        <label for="filter_operator_افغان_بیسیم">📡 افغان بیسیم</label>
+                    </div>
+                    <div class="filter-checkbox" onclick="toggleOperatorFilter(this, 'روشن')">
+                        <input type="checkbox" id="filter_operator_روشن" onchange="applyFilters()">
+                        <label for="filter_operator_روشن">📡 روشن</label>
+                    </div>
+                    <div class="filter-checkbox" onclick="toggleOperatorFilter(this, 'اتصالات')">
+                        <input type="checkbox" id="filter_operator_اتصالات" onchange="applyFilters()">
+                        <label for="filter_operator_اتصالات">📡 اتصالات</label>
+                    </div>
+                    <div class="filter-checkbox" onclick="toggleOperatorFilter(this, 'اتوما')">
+                        <input type="checkbox" id="filter_operator_اتوما" onchange="applyFilters()">
+                        <label for="filter_operator_اتوما">📡 اتوما</label>
+                    </div>
+                    <div class="filter-checkbox" onclick="toggleOperatorFilter(this, 'سلام')">
+                        <input type="checkbox" id="filter_operator_سلام" onchange="applyFilters()">
+                        <label for="filter_operator_سلام">📡 سلام</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <div id="productsTable">
+                    {% if products %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>نام</th>
+                                <th>اپراتور</th>
+                                <th>قیمت</th>
+                                <th>وضعیت</th>
+                                <th>عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for p in products %}
+                            <tr data-name="{{ p.name }}" data-operator="{{ p.operator or '' }}">
+                                <td>{{ loop.index }}</td>
+                                <td>
+                                    <strong>{{ p.name }}</strong>
+                                    <br><small style="color:#aaa;font-size:9px;">{{ p.description[:30] + '...' if p.description and p.description|length > 30 else p.description or '' }}</small>
+                                </td>
+                                <td>
+                                    {% if p.operator == 'افغان بیسیم' %}📡 افغان بیسیم
+                                    {% elif p.operator == 'روشن' %}📡 روشن
+                                    {% elif p.operator == 'اتصالات' %}📡 اتصالات
+                                    {% elif p.operator == 'اتوما' %}📡 اتوما
+                                    {% elif p.operator == 'سلام' %}📡 سلام
+                                    {% else %}{{ p.operator or '-' }}{% endif %}
+                                </td>
+                                <td>{{ "{:,.0f}".format(p.price) }} تومان</td>
+                                <td>
+                                    {% if p.is_active == 1 %}
+                                    <span class="status-badge active">✅ فعال</span>
+                                    {% else %}
+                                    <span class="status-badge inactive">❌ غیرفعال</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group" style="flex-wrap:nowrap; gap:4px;">
+                                        <button class="btn btn-warning btn-sm" onclick="editProduct({{ p.id }})">✏️</button>
+                                        <button class="btn btn-danger btn-sm" onclick="showDeleteModal({{ p.id }})">🗑️</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <h3>هیچ محصولی یافت نشد</h3>
+                        <p>برای افزودن محصول جدید از فرم بالا استفاده کنید.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal">
+            <button class="close-btn" onclick="closeModal('deleteModal')">&times;</button>
+            <h3>⚠️ حذف محصول</h3>
+            <p style="margin-bottom: 20px; color: #666;">آیا از حذف این محصول اطمینان دارید؟ این عمل قابل بازگشت نیست.</p>
+            <div class="btn-group">
+                <button class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">🗑️ حذف</button>
+                <button class="btn" style="background: #ccc;" onclick="closeModal('deleteModal')">انصراف</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let deleteId = null;
+        let editingId = null;
+
+        // ============================================
+        // 📌 تابع انتخاب/لغو انتخاب اپراتور
+        // ============================================
+        function toggleOperatorFilter(element, value) {
+            const checkbox = element.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            
+            if (value === 'all' && checkbox.checked) {
+                document.querySelectorAll('#filterOperatorGroup .filter-checkbox input[type="checkbox"]').forEach(cb => {
+                    cb.checked = true;
+                    cb.closest('.filter-checkbox').classList.add('active');
+                });
+            }
+            else if (value === 'all' && !checkbox.checked) {
+                document.querySelectorAll('#filterOperatorGroup .filter-checkbox input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                    cb.closest('.filter-checkbox').classList.remove('active');
+                });
+            }
+            else if (value !== 'all') {
+                const allCheckbox = document.getElementById('filter_operator_all');
+                if (allCheckbox) {
+                    allCheckbox.checked = false;
+                    allCheckbox.closest('.filter-checkbox').classList.remove('active');
+                }
+            }
+            
+            element.classList.toggle('active', checkbox.checked);
+            applyFilters();
+        }
+
+        // ============================================
+        // 📌 اعمال فیلتر
+        // ============================================
+        function applyFilters() {
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            
+            const selectedOperators = [];
+            document.querySelectorAll('#filterOperatorGroup .filter-checkbox input[type="checkbox"]:checked').forEach(cb => {
+                const label = cb.closest('.filter-checkbox').querySelector('label');
+                if (label) {
+                    let text = label.textContent.trim();
+                    text = text.replace(/^[^\s]+\s/, '').trim();
+                    if (text !== 'همه') {
+                        selectedOperators.push(text);
+                    }
+                }
+            });
+            
+            const allOperatorsChecked = document.getElementById('filter_operator_all').checked;
+            const showAllOperators = allOperatorsChecked || selectedOperators.length === 0;
+            
+            const rows = document.querySelectorAll('#productsTable table tbody tr');
+            let visibleCount = 0;
+            
+            rows.forEach(row => {
+                const operator = row.getAttribute('data-operator') || '';
+                const searchText = row.textContent.toLowerCase();
+                const matchesSearch = searchText.includes(searchQuery);
+                
+                let matchesOperator = true;
+                if (!showAllOperators) {
+                    matchesOperator = selectedOperators.some(o => operator === o);
+                }
+                
+                if (matchesSearch && matchesOperator) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            const total = document.querySelectorAll('#productsTable table tbody tr').length;
+            document.getElementById('totalProducts').textContent = `${visibleCount} محصول (از ${total})`;
+        }
+
+        // ============================================
+        // 📌 افزودن / ویرایش محصول
+        // ============================================
+        document.getElementById('productForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const productId = document.getElementById('productId').value;
+            const url = '/admin_product';
+            const method = productId ? 'PUT' : 'POST';
+
+            const priceValue = document.getElementById('price').value;
+            const price = parseFloat(priceValue) || 0;
+
+            if (price <= 0) {
+                showToast('قیمت باید بزرگتر از صفر باشد', 'error');
+                return;
+            }
+
+            const data = {
+                name: document.getElementById('name').value.trim(),
+                description: document.getElementById('description').value.trim(),
+                price: price,
+                operator: document.getElementById('operator').value,
+                is_active: parseInt(document.getElementById('is_active').value)
+            };
+
+            if (productId) {
+                data.id = parseInt(productId);
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showToast(result.message || (productId ? 'محصول با موفقیت ویرایش شد' : 'محصول با موفقیت اضافه شد'), 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showToast(result.message || 'خطا در عملیات', 'error');
+                }
+            } catch (error) {
+                showToast('خطا در ارتباط با سرور: ' + error.message, 'error');
+            }
+        });
+
+        // ============================================
+        // 📌 ویرایش محصول
+        // ============================================
+        async function editProduct(id) {
+            try {
+                const response = await fetch(`/admin_product?id=${id}`);
+                const data = await response.json();
+
+                if (data.product) {
+                    const p = data.product;
+
+                    document.getElementById('formTitle').textContent = '✏️ ویرایش محصول';
+                    document.getElementById('productId').value = p.id;
+                    document.getElementById('name').value = p.name || '';
+                    document.getElementById('description').value = p.description || '';
+                    document.getElementById('price').value = p.price || 0;
+                    document.getElementById('operator').value = p.operator || '';
+                    document.getElementById('is_active').value = p.is_active ? 1 : 0;
+                    document.getElementById('submitBtn').textContent = '💾 ذخیره تغییرات';
+                    document.getElementById('cancelBtn').style.display = 'inline-block';
+
+                    document.getElementById('formCard').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    showToast('محصول یافت نشد', 'error');
+                }
+            } catch (error) {
+                showToast('خطا در دریافت اطلاعات محصول', 'error');
+            }
+        }
+
+        // ============================================
+        // 📌 حذف محصول
+        // ============================================
+        function showDeleteModal(id) {
+            deleteId = id;
+            document.getElementById('deleteModal').classList.add('show');
+        }
+
+        async function confirmDelete() {
+            if (!deleteId) return;
+
+            try {
+                const response = await fetch('/admin_product', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: deleteId })
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    showToast(result.message || 'محصول با موفقیت حذف شد', 'success');
+                    closeModal('deleteModal');
+                    deleteId = null;
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showToast(result.message || 'خطا در حذف محصول', 'error');
+                }
+            } catch (error) {
+                showToast('خطا در ارتباط با سرور', 'error');
+            }
+        }
+
+        // ============================================
+        // 📌 توابع کمکی
+        // ============================================
+        function resetForm() {
+            document.getElementById('productForm').reset();
+            document.getElementById('productId').value = '';
+            document.getElementById('formTitle').textContent = '➕ افزودن محصول جدید';
+            document.getElementById('submitBtn').textContent = '➕ افزودن محصول';
+            document.getElementById('cancelBtn').style.display = 'none';
+            editingId = null;
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+
+        // ============================================
+        // 📌 اجرای فیلتر بعد از بارگذاری کامل
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(applyFilters, 200);
+        });
+    </script>
+
+</body>
+</html>

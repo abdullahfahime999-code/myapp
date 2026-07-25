@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="fa">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>مدیریت کاربران</title>
+  <style>
+    body { font-family: sans-serif; background: #f7f7f9; margin: 0; color: #222; direction: rtl; }
+    header { background: #017561; color: #fff; padding: 16px 20px; font-weight: 700; }
+    .container { padding: 20px; max-width: 1000px; margin: 0 auto; }
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.08); padding: 16px; overflow: hidden; }
+    .controls { display: flex; gap: 12px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; }
+    .controls input { flex: 1 1 260px; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; }
+    .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; min-width: 900px; }
+    th, td { padding: 12px 10px; border-bottom: 1px solid #eee; text-align: right; white-space: nowrap; }
+    th { background: #fafafa; font-weight: 700; }
+    tr:hover { background: #f5fbf9; }
+    .muted { color: #666; font-size: 12px; }
+    .empty { text-align: center; padding: 28px; color: #777; }
+    .badge { display: inline-block; background: #e8f5f1; color: #075e4f; padding: 4px 8px; border-radius: 999px; font-size: 12px; }
+    .btn { padding: 8px 12px; border: 0; border-radius: 8px; cursor: pointer; }
+    .btn-primary { background: #017561; color: #fff; }
+    .btn-danger { background: #c62828; color: #fff; }
+    .btn-warning { background: #ff9800; color: #fff; }
+    .btn-secondary { background: #607d8b; color: #fff; }
+    .actions { display: flex; gap: 8px; align-items: center; justify-content: flex-start; flex-wrap: wrap; }
+    .status { font-size: 12px; color: #555; }
+    .days-input { width: 80px; padding: 6px 8px; border: 1px solid #ddd; border-radius: 6px; }
+    .avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-left: 8px; border: 2px solid #017561; background: #e8f5f1; }
+    .balance { color: #0F3D1F; font-weight: 800; }
+    .btn-info { background: #0ea5e9; color: #fff; }
+    .btn-success { background: #16a34a; color: #fff; }
+    .dialog-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: none; align-items: center; justify-content: center; z-index: 10000; padding: 20px; }
+    .dialog-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+    .dialog-box { background: #fff; border-radius: 16px; padding: 22px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.35); animation: zoomIn 0.2s ease; }
+    .dialog-box h3 { margin: 0 0 14px 0; color: #075e4f; font-size: 18px; }
+    .dialog-box label { display: block; margin: 10px 0 6px; font-size: 13px; color: #444; font-weight: 700; }
+    .dialog-box input, .dialog-box select, .dialog-box textarea { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; box-sizing: border-box; }
+    .dialog-box .dialog-actions { display: flex; gap: 8px; margin-top: 18px; justify-content: flex-end; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+    .modal-overlay.open { display: flex; animation: fadeIn 0.25s ease; }
+    .modal-content { position: relative; max-width: 90vw; max-height: 90vh; background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); animation: zoomIn 0.25s ease; }
+    .modal-content img { max-width: 100%; max-height: 80vh; display: block; border-radius: 12px; }
+    .modal-close { position: absolute; top: -14px; right: -14px; width: 36px; height: 36px; border-radius: 50%; background: #fff; color: #c62828; border: 0; cursor: pointer; font-size: 20px; font-weight: 800; box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes zoomIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  </style>
+</head>
+<body>
+  <header>مدیریت کاربران</header>
+  <div class="container">
+    <div class="card">
+      <div class="controls">
+        <input id="search" type="text" placeholder="جستجو بر اساس نام یا شماره تماس">
+          <span id="user-count" class="muted">تعداد کاربران: {{ users|length }}</span>
+      </div>
+      {% if users and users|length > 0 %}
+      <div class="table-wrap">
+      <table id="users-table">
+        <thead>
+          <tr>
+            <th>شناسه</th>
+            <th>نام</th>
+            <th>نام خانوادگی</th>
+            <th>موجودی (تومان)</th>
+            <th>تذکره</th>
+            <th>شماره تماس</th>
+            <th>ساعت افغانستان</th>
+            <th>ساعت ایران</th>
+            <th>اقدام</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+          <tr data-user-id="{{ u.id }}">
+            <td>
+              <img class="avatar" src="{{ u.profile_image_url or 'data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 44 44%22><circle cx=%2222%22 cy=%2222%22 r=%2222%22 fill=%22%23e8f5f1%22/><circle cx=%2222%22 cy=%2218%22 r=%227%22 fill=%22%23017561%22/><path d=%22M8 38c2-7 8-10 14-10s12 3 14 10%22 fill=%22%23017561%22/></svg>' }}" alt="{{ u.first_name or '' }}">
+              <span class="badge">{{ u.id }}</span>
+            </td>
+            <td>{{ u.first_name or '' }}</td>
+            <td>{{ u.last_name or '' }}</td>
+            <td class="balance">{{ "{:,}".format(u.balance_toman or 0) }} تومان</td>
+            <td>
+              {% if u.tazkira_image_url %}
+                <button class="btn btn-info tazkira-btn" data-src="{{ u.tazkira_image_url }}" data-name="{{ (u.first_name or '') ~ ' ' ~ (u.last_name or '') }}">مشاهده</button>
+              {% else %}
+                <span class="muted">ندارد</span>
+              {% endif %}
+            </td>
+            <td>{{ u.phone_number or '' }}</td>
+            <td>{{ u.time_kabul }}</td>
+            <td>{{ u.time_tehran }}</td>
+            <td>
+              <div class="actions">
+                <button class="btn btn-warning delete-btn" data-id="{{ u.id }}" data-name="{{ (u.first_name or '') ~ ' ' ~ (u.last_name or '') }}">حذف کاربر</button>
+                <button class="btn btn-success balance-btn" data-id="{{ u.id }}" data-name="{{ (u.first_name or '') ~ ' ' ~ (u.last_name or '') }}" data-balance="{{ u.balance_toman or 0 }}">ویرایش موجودی</button>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      {% else %}
+      <div class="empty">کاربری یافت نشد</div>
+      {% endif %}
+    </div>
+  </div>
+  <div id="tazkira-modal" class="modal-overlay" onclick="if(event.target===this)closeTazkiraModal()">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeTazkiraModal()" aria-label="بستن">×</button>
+      <img id="tazkira-img" src="" alt="تذکره">
+    </div>
+  </div>
+  <div id="balance-dialog" class="dialog-overlay" onclick="if(event.target===this)closeBalanceDialog()">
+    <div class="dialog-box">
+      <h3 id="balance-title">ویرایش موجودی</h3>
+      <label for="balance-amount">موجودی (تومان)</label>
+      <input id="balance-amount" type="number" min="0" step="1000" placeholder="مثلاً ۵۰۰۰۰">
+      <div class="dialog-actions">
+        <button class="btn btn-secondary" onclick="closeBalanceDialog()">انصراف</button>
+        <button class="btn btn-success" id="balance-submit">ذخیره</button>
+      </div>
+    </div>
+  </div>
+  <div id="confirm-dialog" class="dialog-overlay" onclick="if(event.target===this)closeConfirmDialog()">
+    <div class="dialog-box" style="text-align:center; max-width:380px;">
+      <div style="width:64px;height:64px;margin:0 auto 12px;background:#fee2e2;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+        <span style="font-size:32px;color:#c62828;">!</span>
+      </div>
+      <h3 id="confirm-title" style="color:#c62828;">تأیید حذف</h3>
+      <p id="confirm-message" style="color:#555;line-height:1.7;margin:8px 0 4px;">آیا مطمئن هستید؟</p>
+      <div class="dialog-actions" style="justify-content:center;">
+        <button class="btn btn-secondary" onclick="closeConfirmDialog()">خیر</button>
+        <button class="btn btn-danger" id="confirm-yes">بله</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    const search = document.getElementById('search');
+    const table = document.getElementById('users-table');
+    const userCount = document.getElementById('user-count');
+    if (search && table) {
+      search.addEventListener('input', function () {
+        const q = this.value.trim().toLowerCase();
+        const rows = table.querySelectorAll('tbody tr');
+        rows.forEach(r => {
+          const cells = Array.from(r.children).map(td => td.textContent.toLowerCase());
+          const match = cells.some(t => t.includes(q));
+          r.style.display = match ? '' : 'none';
+        });
+      });
+    }
+    function attachDeleteHandlers() {
+      const buttons = document.querySelectorAll('.delete-btn');
+      buttons.forEach(btn => {
+        btn.addEventListener('click', function () {
+          const id = this.getAttribute('data-id');
+          if (!id) return;
+          const name = (this.getAttribute('data-name') || ('کاربر #' + id)).trim();
+          const message = 'آیا از حذف «' + name + '» مطمئن هستید؟';
+          openConfirmDialog('تأیید حذف کاربر', message, async () => {
+            this.disabled = true;
+            try {
+              const res = await fetch('/api/admin/user/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: Number(id) })
+              });
+              const data = await res.json().catch(() => ({}));
+              if (res.ok) {
+                const row = this.closest('tr');
+                if (row) row.remove();
+                if (table && userCount) {
+                  const rows = table.querySelectorAll('tbody tr');
+                  userCount.textContent = 'تعداد کاربران: ' + rows.length;
+                }
+              } else {
+                alert((data && data.message) || 'خطا در حذف کاربر');
+              }
+            } catch (e) {
+              alert('خطا در ارتباط: ' + e);
+            } finally {
+              this.disabled = false;
+            }
+          });
+        }, { passive: true });
+      });
+    }
+    function openTazkiraModal(src) {
+      const modal = document.getElementById('tazkira-modal');
+      const img = document.getElementById('tazkira-img');
+      if (!modal || !img) return;
+      img.src = src;
+      modal.classList.add('open');
+    }
+    function closeTazkiraModal() {
+      const modal = document.getElementById('tazkira-modal');
+      const img = document.getElementById('tazkira-img');
+      if (modal) modal.classList.remove('open');
+      if (img) img.src = '';
+    }
+    function attachTazkiraHandlers() {
+      const buttons = document.querySelectorAll('.tazkira-btn');
+      buttons.forEach(btn => {
+        btn.addEventListener('click', function () {
+          const src = this.getAttribute('data-src');
+          if (src) openTazkiraModal(src);
+        }, { passive: true });
+      });
+    }
+    let _balanceUserId = null;
+    function openBalanceDialog(userId, userName, currentBalance) {
+      _balanceUserId = userId;
+      const dialog = document.getElementById('balance-dialog');
+      const title = document.getElementById('balance-title');
+      if (title) title.textContent = 'ویرایش موجودی — ' + (userName || ('کاربر #' + userId));
+      const amt = document.getElementById('balance-amount');
+      if (amt) {
+        amt.value = (currentBalance !== undefined && currentBalance !== null) ? String(currentBalance) : '';
+      }
+      if (dialog) dialog.classList.add('open');
+      if (amt) setTimeout(() => { amt.focus(); amt.select(); }, 50);
+    }
+    function closeBalanceDialog() {
+      const dialog = document.getElementById('balance-dialog');
+      if (dialog) dialog.classList.remove('open');
+      _balanceUserId = null;
+    }
+    function attachBalanceHandlers() {
+      const buttons = document.querySelectorAll('.balance-btn');
+      buttons.forEach(btn => {
+        btn.addEventListener('click', function () {
+          const id = this.getAttribute('data-id');
+          const name = this.getAttribute('data-name') || '';
+          const balanceText = this.getAttribute('data-balance') || '0';
+          const balance = parseInt(balanceText.replace(/[^0-9-]/g, ''), 10) || 0;
+          if (id) openBalanceDialog(id, name.trim(), balance);
+        }, { passive: true });
+      });
+      const submit = document.getElementById('balance-submit');
+      if (submit) {
+        submit.addEventListener('click', async function () {
+          if (!_balanceUserId) return;
+          const amtEl = document.getElementById('balance-amount');
+          const amount = amtEl ? parseFloat(amtEl.value || '0') : 0;
+          if (isNaN(amount) || amount < 0) {
+            alert('مقدار باید عددی بزرگ‌تر یا مساوی صفر باشد');
+            return;
+          }
+          this.disabled = true;
+          try {
+            const res = await fetch('/api/admin/user/balance', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                user_id: Number(_balanceUserId),
+                amount: amount,
+              })
+            });
+            const data = await res.json().catch(() => ({}));
+            if (res.ok) {
+              const balanceCell = document.querySelector('tr[data-user-id="' + _balanceUserId + '"] .balance');
+              if (balanceCell) {
+                const v = Math.round(Number(data.balance || 0));
+                balanceCell.textContent = v.toLocaleString('en-US') + ' تومان';
+                const btn = document.querySelector('tr[data-user-id="' + _balanceUserId + '"] .balance-btn');
+                if (btn) btn.setAttribute('data-balance', String(v));
+              }
+              closeBalanceDialog();
+            } else {
+              alert((data && data.message) || 'خطا در به‌روزرسانی موجودی');
+            }
+          } catch (e) {
+            alert('خطا در ارتباط: ' + e);
+          } finally {
+            this.disabled = false;
+          }
+        });
+      }
+    }
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        closeTazkiraModal();
+        closeBalanceDialog();
+        closeConfirmDialog();
+      }
+    });
+    function openConfirmDialog(title, message, onConfirm) {
+      const dialog = document.getElementById('confirm-dialog');
+      const titleEl = document.getElementById('confirm-title');
+      const msgEl = document.getElementById('confirm-message');
+      const yesBtn = document.getElementById('confirm-yes');
+      if (!dialog || !titleEl || !msgEl || !yesBtn) return;
+      titleEl.textContent = title || 'تأیید';
+      msgEl.textContent = message || 'آیا مطمئن هستید؟';
+      const newYes = yesBtn.cloneNode(true);
+      yesBtn.parentNode.replaceChild(newYes, yesBtn);
+      newYes.addEventListener('click', function () {
+        closeConfirmDialog();
+        if (typeof onConfirm === 'function') onConfirm();
+      });
+      dialog.classList.add('open');
+    }
+    function closeConfirmDialog() {
+      const dialog = document.getElementById('confirm-dialog');
+      if (dialog) dialog.classList.remove('open');
+    }
+    attachDeleteHandlers();
+    attachTazkiraHandlers();
+    attachBalanceHandlers();
+  </script>
+</body>
+</html>

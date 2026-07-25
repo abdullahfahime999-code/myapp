@@ -1,0 +1,42 @@
+name: myapp
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  provider: ^6.1.2            # ✅ برای ذخیره حالت شب (اختیاری)
+  # The following adds the Cupertino Icons font to your application.
+  cupertino_icons: ^1.0.8
+  http: ^1.2.0
+  file_picker: ^11.0.2
+  shared_preferences: ^2.2.2
+  flutter_secure_storage: ^9.0.0
+  flutter_svg: ^2.0.10+1  # ✅ اینجا باید باشه (در dependencies)
+  intl: ^0.19.0
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  # ✅ assets رو اینجا اضافه کن
+  assets:
+    - assets/svg/
+    - assets/images/operators/
+
+  fonts:
+    - family: Vazir
+      fonts:
+        - asset: assets/fonts/Vazir-Regular.ttf
+        - asset: assets/fonts/Vazir-Bold.ttf
+          weight: 700

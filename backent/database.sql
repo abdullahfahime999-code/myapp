@@ -1,0 +1,21 @@
+CREATE DATABASE IF NOT EXISTS auth_db
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+USE auth_db;
+
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    phone_number VARCHAR(20) NOT NULL UNIQUE,
+    password_hash VARCHAR(100) NOT NULL,
+    pin_code_hash VARCHAR(100) NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    tazkira_image_path VARCHAR(255) NULL,
+    profile_image_path VARCHAR(255) NULL,
+    balance DECIMAL(30,2) NOT NULL DEFAULT 0,
+    restricted TINYINT(1) NOT NULL DEFAULT 0,
+    expires_at DATETIME NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

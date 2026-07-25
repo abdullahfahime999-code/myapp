@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت محصولات ایران</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Vazir', Tahoma, sans-serif;
+            background: #f0fdf4;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0E8A4D, #16A34A);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header h1 i {
+            font-size: 28px;
+        }
+        .header .links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .header .links a {
+            color: white;
+            text-decoration: none;
+            background: rgba(255,255,255,0.15);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .header .links a:hover {
+            background: rgba(255,255,255,0.30);
+            transform: translateY(-2px);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-right: 4px solid #0E8A4D;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .stat-card .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            background: rgba(14, 138, 77, 0.10);
+            color: #0E8A4D;
+        }
+        .stat-card .stat-info .number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #0E8A4D;
+        }
+        .stat-card .stat-info .label {
+            font-size: 14px;
+            color: #6B7280;
+        }
+        .stat-card.active { border-color: #10B981; }
+        .stat-card.active .stat-icon { background: rgba(16, 185, 129, 0.10); color: #10B981; }
+        .stat-card.active .number { color: #10B981; }
+        .stat-card.inactive { border-color: #EF4444; }
+        .stat-card.inactive .stat-icon { background: rgba(239, 68, 68, 0.10); color: #EF4444; }
+        .stat-card.inactive .number { color: #EF4444; }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .toolbar .filter-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .toolbar .filter-group label {
+            font-size: 13px;
+            color: #6B7280;
+            font-weight: 600;
+        }
+        .toolbar .filter-group select {
+            padding: 6px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 13px;
+            background: white;
+            font-family: 'Vazir', Tahoma, sans-serif;
+            outline: none;
+        }
+        .toolbar .filter-group select:focus {
+            border-color: #0E8A4D;
+        }
+        .btn-add {
+            background: #0E8A4D;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Vazir', Tahoma, sans-serif;
+        }
+        .btn-add:hover {
+            background: #0A6B3A;
+            transform: translateY(-2px);
+        }
+
+        .table-wrapper {
+            background: white;
+            border-radius: 16px;
+            overflow-x: auto;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        }
+        .table-wrapper table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            min-width: 1000px;
+        }
+        .table-wrapper th {
+            background: #f9fafb;
+            color: #374151;
+            font-weight: 700;
+            padding: 14px 16px;
+            text-align: right;
+            border-bottom: 2px solid #e5e7eb;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .table-wrapper th i {
+            margin-left: 6px;
+            color: #0E8A4D;
+        }
+        .table-wrapper td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f3f4f6;
+            vertical-align: middle;
+        }
+        .table-wrapper tr:hover td {
+            background: #f9fafb;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-badge.active {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+        .status-badge.inactive {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .btn {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-family: 'Vazir', Tahoma, sans-serif;
+        }
+        .btn-edit {
+            background: #F59E0B;
+            color: white;
+        }
+        .btn-edit:hover {
+            background: #D97706;
+        }
+        .btn-delete {
+            background: #EF4444;
+            color: white;
+        }
+        .btn-delete:hover {
+            background: #DC2626;
+        }
+        .btn-sm {
+            padding: 4px 10px;
+            font-size: 11px;
+        }
+
+        .operator-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .operator-badge.irancell {
+            background: #EDE7F6;
+            color: #5E35B1;
+        }
+        .operator-badge.rightel {
+            background: #FCE4EC;
+            color: #C62828;
+        }
+        .operator-badge.hamraheaval {
+            background: #E0F7FA;
+            color: #00695C;
+        }
+        .operator-badge.unknown {
+            background: #F5F5F5;
+            color: #616161;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6B7280;
+        }
+        .empty-state .icon {
+            font-size: 56px;
+            color: #d1d5db;
+            margin-bottom: 16px;
+        }
+        .empty-state p {
+            font-size: 16px;
+        }
+
+        .price-text {
+            font-weight: 700;
+            color: #0E8A4D;
+            font-size: 14px;
+        }
+
+        /* مودال */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.50);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 550px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 24px 48px rgba(0,0,0,0.30);
+            animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn {
+            from {
+                transform: scale(0.9) translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+        .modal h2 {
+            font-size: 22px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #0E8A4D;
+        }
+        .modal h2 i {
+            font-size: 24px;
+        }
+        .modal .subtitle {
+            color: #6B7280;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .modal .form-group {
+            margin-bottom: 16px;
+        }
+        .modal .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+        .modal .form-group input,
+        .modal .form-group textarea,
+        .modal .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Vazir', Tahoma, sans-serif;
+            transition: border-color 0.3s;
+            background: #fafafa;
+        }
+        .modal .form-group input:focus,
+        .modal .form-group textarea:focus,
+        .modal .form-group select:focus {
+            outline: none;
+            border-color: #0E8A4D;
+            background: white;
+        }
+        .modal .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .modal .form-group .hint {
+            font-size: 12px;
+            color: #9CA3AF;
+            margin-top: 4px;
+        }
+        .modal .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+        .modal .modal-actions .btn-cancel {
+            background: #e5e7eb;
+            color: #374151;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Vazir', Tahoma, sans-serif;
+        }
+        .modal .modal-actions .btn-cancel:hover {
+            background: #d1d5db;
+        }
+        .modal .modal-actions .btn-save {
+            background: #0E8A4D;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Vazir', Tahoma, sans-serif;
+        }
+        .modal .modal-actions .btn-save:hover {
+            background: #0A6B3A;
+        }
+
+        /* تذکر */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1F2937;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.20);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transition: all 0.4s ease;
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .toast i {
+            font-size: 18px;
+            color: #10B981;
+        }
+
+        @media (max-width: 768px) {
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .header .links {
+                justify-content: center;
+            }
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .toolbar .filter-group {
+                justify-content: center;
+            }
+            .modal {
+                padding: 24px;
+            }
+            .stat-card {
+                padding: 12px 16px;
+            }
+            .stat-card .stat-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+            .stat-card .stat-info .number {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- تذکر -->
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">عملیات با موفقیت انجام شد</span>
+    </div>
+
+    <!-- مودال افزودن/ویرایش -->
+    <div id="productModal" class="modal-overlay">
+        <div class="modal">
+            <h2 id="modalTitle">
+                <i class="fas fa-plus-circle"></i>
+                افزودن محصول جدید
+            </h2>
+            <p class="subtitle" id="modalSubtitle">اطلاعات محصول را وارد کنید</p>
+
+            <form id="productForm">
+                <input type="hidden" id="productId" value="">
+
+                <div class="form-group">
+                    <label for="productName">نام محصول</label>
+                    <input type="text" id="productName" placeholder="مثال: بسته اینترنت 10 گیگ" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="productDescription">توضیحات</label>
+                    <textarea id="productDescription" placeholder="توضیحات محصول را وارد کنید"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="productPrice">قیمت (تومان)</label>
+                    <input type="number" id="productPrice" placeholder="مثال: 150000" required min="0">
+                    <div class="hint">قیمت را به تومان وارد کنید</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="productOperator">اپراتور</label>
+                    <select id="productOperator" required>
+                        <option value="">انتخاب اپراتور...</option>
+                        <option value="ایرانسل">ایرانسل</option>
+                        <option value="رایتل">رایتل</option>
+                        <option value="همراه اول">همراه اول</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="productStatus">وضعیت</label>
+                    <select id="productStatus">
+                        <option value="1">فعال</option>
+                        <option value="0">غیرفعال</option>
+                    </select>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">
+                        <i class="fas fa-times"></i> انصراف
+                    </button>
+                    <button type="submit" class="btn-save">
+                        <i class="fas fa-save"></i> ذخیره
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <i class="fas fa-sim-card"></i>
+                مدیریت محصولات ایران
+            </h1>
+            <div class="links">
+                <a href="/admin_dashboard"><i class="fas fa-home"></i> داشبورد</a>
+                <a href="/admin_product"><i class="fas fa-box"></i> محصولات افغانستان</a>
+                <a href="/admin_user_control"><i class="fas fa-users"></i> کاربران</a>
+                <a href="/admin_charger"><i class="fas fa-coins"></i> شارژ</a>
+                <a href="/admin_logout"><i class="fas fa-sign-out-alt"></i> خروج</a>
+            </div>
+        </div>
+
+        <!-- آمار -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-sim-card"></i></div>
+                <div class="stat-info">
+                    <div class="number" id="totalCount">0</div>
+                    <div class="label">مجموع محصولات</div>
+                </div>
+            </div>
+            <div class="stat-card active">
+                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-info">
+                    <div class="number" id="activeCount">0</div>
+                    <div class="label">فعال</div>
+                </div>
+            </div>
+            <div class="stat-card inactive">
+                <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
+                <div class="stat-info">
+                    <div class="number" id="inactiveCount">0</div>
+                    <div class="label">غیرفعال</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- نوار ابزار -->
+        <div class="toolbar">
+            <div class="filter-group">
+                <label for="filterOperator"><i class="fas fa-filter"></i> فیلتر:</label>
+                <select id="filterOperator" onchange="applyFilter()">
+                    <option value="">همه اپراتورها</option>
+                    <option value="ایرانسل">ایرانسل</option>
+                    <option value="رایتل">رایتل</option>
+                    <option value="همراه اول">همراه اول</option>
+                </select>
+                <select id="filterStatus" onchange="applyFilter()">
+                    <option value="">همه وضعیت‌ها</option>
+                    <option value="1">فعال</option>
+                    <option value="0">غیرفعال</option>
+                </select>
+            </div>
+            <button class="btn-add" onclick="openAddModal()">
+                <i class="fas fa-plus"></i> افزودن محصول جدید
+            </button>
+        </div>
+
+        <!-- جدول محصولات -->
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-hashtag"></i> #</th>
+                        <th><i class="fas fa-tag"></i> نام</th>
+                        <th><i class="fas fa-align-left"></i> توضیحات</th>
+                        <th><i class="fas fa-money-bill-wave"></i> قیمت</th>
+                        <th><i class="fas fa-satellite-dish"></i> اپراتور</th>
+                        <th><i class="fas fa-circle"></i> وضعیت</th>
+                        <th><i class="fas fa-bolt"></i> عملیات</th>
+                    </tr>
+                </thead>
+                <tbody id="productsTableBody">
+                    <!-- محصولات توسط جاوااسکریپت پر می‌شوند -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // 📌 متغیرها
+        // ============================================
+        let products = [];
+        let editingId = null;
+
+        // ============================================
+        // 📌 اپراتورهای ایران
+        // ============================================
+        const operators = ['ایرانسل', 'رایتل', 'همراه اول'];
+
+        // ============================================
+        // 📌 دریافت محصولات از سرور
+        // ============================================
+        async function loadProducts() {
+            try {
+                const response = await fetch('/admin_product_iran');
+                const data = await response.json();
+
+                if (data.products) {
+                    products = data.products;
+                    renderTable(products);
+                    updateStats(products);
+                } else {
+                    products = [];
+                    renderTable([]);
+                    updateStats([]);
+                }
+            } catch (error) {
+                console.error('خطا در دریافت محصولات:', error);
+                showToast('❌ خطا در دریافت محصولات');
+            }
+        }
+
+        // ============================================
+        // 📌 رندر جدول
+        // ============================================
+        function renderTable(data) {
+            const tbody = document.getElementById('productsTableBody');
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <div class="icon"><i class="fas fa-sim-card"></i></div>
+                                <p>هیچ محصولی یافت نشد</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = data.map(product => {
+                const statusClass = product.is_active ? 'active' : 'inactive';
+                const statusText = product.is_active ? 'فعال' : 'غیرفعال';
+                
+                let operatorClass = 'unknown';
+                if (product.operator === 'ایرانسل') operatorClass = 'irancell';
+                else if (product.operator === 'رایتل') operatorClass = 'rightel';
+                else if (product.operator === 'همراه اول') operatorClass = 'hamraheaval';
+
+                return `
+                    <tr>
+                        <td><strong>${product.id}</strong></td>
+                        <td><strong>${product.name || '-'}</strong></td>
+                        <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            ${product.description || '-'}
+                        </td>
+                        <td class="price-text">${formatPrice(product.price)} تومان</td>
+                        <td>
+                            <span class="operator-badge ${operatorClass}">
+                                <i class="fas fa-satellite-dish"></i>
+                                ${product.operator || 'نامشخص'}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-badge ${statusClass}">
+                                <i class="fas ${product.is_active ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                                ${statusText}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-edit btn-sm" onclick="openEditModal(${product.id})">
+                                <i class="fas fa-edit"></i> ویرایش
+                            </button>
+                            <button class="btn btn-delete btn-sm" onclick="deleteProduct(${product.id})">
+                                <i class="fas fa-trash"></i> حذف
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // ============================================
+        // 📌 آمار
+        // ============================================
+        function updateStats(data) {
+            const total = data.length;
+            const active = data.filter(p => p.is_active).length;
+            const inactive = total - active;
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('activeCount').textContent = active;
+            document.getElementById('inactiveCount').textContent = inactive;
+        }
+
+        // ============================================
+        // 📌 فیلتر
+        // ============================================
+        function applyFilter() {
+            const operatorFilter = document.getElementById('filterOperator').value;
+            const statusFilter = document.getElementById('filterStatus').value;
+
+            let filtered = products;
+
+            if (operatorFilter) {
+                filtered = filtered.filter(p => p.operator === operatorFilter);
+            }
+            if (statusFilter !== '') {
+                filtered = filtered.filter(p => p.is_active === parseInt(statusFilter));
+            }
+
+            renderTable(filtered);
+            updateStats(filtered);
+        }
+
+        // ============================================
+        // 📌 باز کردن مودال افزودن
+        // ============================================
+        function openAddModal() {
+            editingId = null;
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus-circle"></i> افزودن محصول جدید';
+            document.getElementById('modalSubtitle').textContent = 'اطلاعات محصول جدید را وارد کنید';
+            document.getElementById('productId').value = '';
+            document.getElementById('productForm').reset();
+            document.getElementById('productStatus').value = '1';
+            document.getElementById('productModal').classList.add('active');
+        }
+
+        // ============================================
+        // 📌 باز کردن مودال ویرایش
+        // ============================================
+        function openEditModal(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+
+            editingId = id;
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> ویرایش محصول';
+            document.getElementById('modalSubtitle').textContent = 'اطلاعات محصول را ویرایش کنید';
+            document.getElementById('productId').value = id;
+            document.getElementById('productName').value = product.name || '';
+            document.getElementById('productDescription').value = product.description || '';
+            document.getElementById('productPrice').value = product.price || '';
+            document.getElementById('productOperator').value = product.operator || '';
+            document.getElementById('productStatus').value = product.is_active ? '1' : '0';
+            document.getElementById('productModal').classList.add('active');
+        }
+
+        // ============================================
+        // 📌 بستن مودال
+        // ============================================
+        function closeModal() {
+            document.getElementById('productModal').classList.remove('active');
+            editingId = null;
+        }
+
+        // ============================================
+        // 📌 ذخیره محصول (افزودن/ویرایش)
+        // ============================================
+        document.getElementById('productForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('productId').value;
+            const name = document.getElementById('productName').value.trim();
+            const description = document.getElementById('productDescription').value.trim();
+            const price = parseFloat(document.getElementById('productPrice').value);
+            const operator = document.getElementById('productOperator').value;
+            const is_active = parseInt(document.getElementById('productStatus').value);
+
+            if (!name) {
+                showToast('❌ لطفاً نام محصول را وارد کنید');
+                return;
+            }
+            if (!price || price < 0) {
+                showToast('❌ لطفاً قیمت معتبر وارد کنید');
+                return;
+            }
+            if (!operator) {
+                showToast('❌ لطفاً اپراتور را انتخاب کنید');
+                return;
+            }
+
+            const url = id ? '/admin_product_iran' : '/admin_product_iran';
+            const method = id ? 'PUT' : 'POST';
+
+            const body = id ? {
+                id: parseInt(id),
+                name,
+                description,
+                price,
+                operator,
+                is_active
+            } : {
+                name,
+                description,
+                price,
+                operator,
+                is_active
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showToast('✅ ' + (id ? 'محصول با موفقیت ویرایش شد' : 'محصول با موفقیت اضافه شد'));
+                    closeModal();
+                    loadProducts();
+                } else {
+                    showToast('❌ ' + (data.message || 'خطا در ذخیره محصول'));
+                }
+            } catch (error) {
+                console.error('خطا:', error);
+                showToast('❌ خطا در ارتباط با سرور');
+            }
+        });
+
+        // ============================================
+        // 📌 حذف محصول
+        // ============================================
+        async function deleteProduct(id) {
+            if (!confirm('آیا از حذف این محصول مطمئن هستید؟')) return;
+
+            try {
+                const response = await fetch('/admin_product_iran', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id: id })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showToast('✅ محصول با موفقیت حذف شد');
+                    loadProducts();
+                } else {
+                    showToast('❌ ' + (data.message || 'خطا در حذف محصول'));
+                }
+            } catch (error) {
+                console.error('خطا:', error);
+                showToast('❌ خطا در ارتباط با سرور');
+            }
+        }
+
+        // ============================================
+        // 📌 فرمت قیمت
+        // ============================================
+        function formatPrice(price) {
+            if (!price && price !== 0) return '0';
+            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        // ============================================
+        // 📌 نمایش تذکر
+        // ============================================
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const span = document.getElementById('toastMessage');
+            span.textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // ============================================
+        // 📌 بستن مودال با کلیک روی overlay
+        // ============================================
+        document.getElementById('productModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // ============================================
+        // 📌 بستن مودال با دکمه Escape
+        // ============================================
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // ============================================
+        // 📌 بارگذاری اولیه
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProducts();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,553 @@
+import 'package:flutter/material.dart';
+import '../irproduct/showproduct_ir.dart'; // ✅ تغییر به showproduct_ir
+
+class IranOperatorDetectorPage extends StatefulWidget {
+  const IranOperatorDetectorPage({super.key});
+
+  @override
+  State<IranOperatorDetectorPage> createState() =>
+      _IranOperatorDetectorPageState();
+}
+
+class _IranOperatorDetectorPageState extends State<IranOperatorDetectorPage> {
+  final TextEditingController _phoneController = TextEditingController();
+  String _operatorName = '';
+  String _operatorImage = '';
+  Color _operatorColor = Colors.grey;
+
+  // ============================================
+  // 📌 لیست اپراتورهای ایران با عکس و پیش‌شماره
+  // ============================================
+  final List<Map<String, dynamic>> _operators = [
+    {
+      'name': 'ایرانسل',
+      'image': 'assets/images/operators/iran_cell.png',
+      'prefixes': [
+        '0910',
+        '0911',
+        '0912',
+        '0913',
+        '0914',
+        '0915',
+        '0916',
+        '0917',
+        '0918',
+        '0919',
+        '0901',
+        '0902',
+        '0903',
+        '0904',
+        '0905',
+        '0930',
+        '0931',
+        '0932',
+        '0933',
+        '0934',
+        '0935',
+        '0936',
+        '0937',
+        '0938',
+        '0939'
+      ],
+      'color': Color(0xFF6C2BD9),
+    },
+    {
+      'name': 'رایتل',
+      'image': 'assets/images/operators/rightel.png',
+      'prefixes': [
+        '0920',
+        '0921',
+        '0922',
+        '0923',
+        '0924',
+        '0925',
+        '0926',
+        '0927',
+        '0928',
+        '0929'
+      ],
+      'color': Color(0xFFE91E63),
+    },
+    {
+      'name': 'همراه اول',
+      'image': 'assets/images/operators/hamrahe_aval.png',
+      'prefixes': [
+        '091',
+        '093',
+        '0990',
+        '0991',
+        '0992',
+        '0993',
+        '0994',
+        '0995',
+        '0996',
+        '0997',
+        '0998',
+        '0999'
+      ],
+      'color': Color(0xFF00BCD4),
+    },
+  ];
+
+  // ============================================
+  // 📌 تشخیص اپراتور بر اساس شماره
+  // ============================================
+  void detectOperator(String phoneNumber) {
+    String cleaned = phoneNumber.replaceAll(RegExp(r'[\s\-]'), '');
+
+    if (cleaned.isEmpty) {
+      setState(() {
+        _operatorName = '';
+        _operatorImage = '';
+        _operatorColor = Colors.grey;
+      });
+      return;
+    }
+
+    for (var op in _operators) {
+      for (var prefix in op['prefixes']) {
+        if (cleaned.startsWith(prefix)) {
+          setState(() {
+            _operatorName = op['name'];
+            _operatorImage = op['image'];
+            _operatorColor = op['color'];
+          });
+          return;
+        }
+      }
+    }
+
+    setState(() {
+      _operatorName = 'اپراتور نامشخص';
+      _operatorImage = 'assets/images/operators/unknown.png';
+      _operatorColor = Colors.grey;
+    });
+  }
+
+  // ============================================
+  // 📌 بررسی اینکه آیا اپراتور انتخاب شده است
+  // ============================================
+  bool _isOperatorSelected(String operatorName) {
+    return _operatorName == operatorName;
+  }
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'خرید اینترنت ایران',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        backgroundColor: const Color(0xFF0E8A4D),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              '🇮🇷 خرید بسته اینترنت ایران',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF0E8A4D),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'برای خرید بسته لطفاً شماره خود را دقیق وارد کنید',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // ============================================
+            // 📌 فیلد ورودی شماره
+            // ============================================
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: TextFormField(
+                controller: _phoneController,
+                keyboardType: TextInputType.phone,
+                maxLength: 15,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
+                decoration: InputDecoration(
+                  hintText: 'مثال: 09123456789',
+                  hintStyle: TextStyle(
+                    color: Colors.grey[400],
+                    fontSize: 16,
+                  ),
+                  prefixIcon: const Icon(
+                    Icons.phone_android_rounded,
+                    color: Color(0xFF0E8A4D),
+                    size: 28,
+                  ),
+                  counterText: '',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[50],
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
+                ),
+                onChanged: (value) {
+                  detectOperator(value);
+                },
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // ============================================
+            // 📌 نمایش ۳ لوگوی اپراتور در یک ردیف
+            // ============================================
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.08),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: _operators.map((op) {
+                  final isSelected = _isOperatorSelected(op['name']);
+                  return _OperatorLogoItem(
+                    imagePath: op['image'],
+                    name: op['name'],
+                    isSelected: isSelected,
+                    color: op['color'],
+                    onTap: () {
+                      final prefix = op['prefixes'][0];
+                      _phoneController.text = '$prefix' '1234567';
+                      detectOperator(_phoneController.text);
+                    },
+                  );
+                }).toList(),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // ============================================
+            // 📌 نمایش نتیجه با عکس
+            // ============================================
+            if (_operatorName.isNotEmpty)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      _operatorColor.withOpacity(0.15),
+                      _operatorColor.withOpacity(0.05),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: _operatorColor.withOpacity(0.3),
+                    width: 2,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.2),
+                            blurRadius: 8,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.asset(
+                          _operatorImage,
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.grey[200],
+                              child: const Icon(
+                                Icons.broken_image_rounded,
+                                size: 40,
+                                color: Colors.grey,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      _operatorName,
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: _operatorColor,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'شماره شما متعلق به این اپراتور است',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Colors.grey[200]!,
+                  ),
+                ),
+                child: const Column(
+                  children: [
+                    Icon(
+                      Icons.phone_android_rounded,
+                      size: 60,
+                      color: Colors.grey,
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'شماره را وارد کنید',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'تا اپراتور شما تشخیص داده شود',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+            const Spacer(),
+
+            // ============================================
+            // 📌 دکمه تایید - رفتن به showproduct_ir
+            // ============================================
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  if (_phoneController.text.trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('لطفاً شماره تماس خود را وارد کنید'),
+                        backgroundColor: Colors.red,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                    return;
+                  }
+
+                  if (_operatorName == 'اپراتور نامشخص' ||
+                      _operatorName.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                            'شماره وارد شده معتبر نیست. لطفاً شماره صحیح را وارد کنید'),
+                        backgroundColor: Colors.red,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                    return;
+                  }
+
+                  // ✅ رفتن به صفحه نمایش بسته‌های ایران
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ShowProductIranPage(
+                        operatorName: _operatorName,
+                        phoneNumber: _phoneController.text.trim(),
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.arrow_forward_rounded),
+                label: const Text(
+                  'مشاهده بسته‌ها',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0E8A4D),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 4,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================
+// 📌 ویجت لوگوی هر اپراتور
+// ============================================
+class _OperatorLogoItem extends StatelessWidget {
+  final String imagePath;
+  final String name;
+  final bool isSelected;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _OperatorLogoItem({
+    required this.imagePath,
+    required this.name,
+    required this.isSelected,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: isSelected ? color.withOpacity(0.15) : Colors.grey[100],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected ? color : Colors.grey[300]!,
+                    width: isSelected ? 2.5 : 1,
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(
+                    imagePath,
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Center(
+                        child: Text(
+                          name[0],
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected ? color : Colors.grey[400],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              if (isSelected)
+                Positioned(
+                  top: -4,
+                  right: -4,
+                  child: Container(
+                    width: 20,
+                    height: 20,
+                    decoration: const BoxDecoration(
+                      color: Colors.green,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check_rounded,
+                      size: 14,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            name,
+            style: TextStyle(
+              fontSize: 9,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              color: isSelected ? color : Colors.grey[600],
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+}

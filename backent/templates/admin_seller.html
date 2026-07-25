@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت سفارشات</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Vazir', Tahoma, sans-serif;
+            background: #f0fdf4;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            background: linear-gradient(135deg, #0E8A4D, #16A34A);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .header a {
+            color: white;
+            text-decoration: none;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-right: 4px solid #0E8A4D;
+        }
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #0E8A4D;
+        }
+        .stat-card .label {
+            font-size: 14px;
+            color: #6B7280;
+        }
+        .stat-card.pending { border-color: #F59E0B; }
+        .stat-card.pending .number { color: #F59E0B; }
+        .stat-card.completed { border-color: #10B981; }
+        .stat-card.completed .number { color: #10B981; }
+        .stat-card.cancelled { border-color: #EF4444; }
+        .stat-card.cancelled .number { color: #EF4444; }
+
+        .table-wrapper {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        }
+        .table-wrapper table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .table-wrapper th {
+            background: #f9fafb;
+            color: #374151;
+            font-weight: 600;
+            padding: 14px 16px;
+            text-align: right;
+            border-bottom: 2px solid #e5e7eb;
+            white-space: nowrap;
+        }
+        .table-wrapper td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f3f4f6;
+            vertical-align: middle;
+        }
+        .table-wrapper tr:hover td {
+            background: #f9fafb;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-badge.pending { background: #FEF3C7; color: #92400E; }
+        .status-badge.completed { background: #D1FAE5; color: #065F46; }
+        .status-badge.cancelled { background: #FEE2E2; color: #991B1B; }
+
+        .btn {
+            padding: 6px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-confirm {
+            background: #10B981;
+            color: white;
+        }
+        .btn-confirm:hover {
+            background: #059669;
+        }
+        .btn-reject {
+            background: #EF4444;
+            color: white;
+        }
+        .btn-reject:hover {
+            background: #DC2626;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-sm {
+            padding: 4px 12px;
+            font-size: 12px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6B7280;
+        }
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .table-wrapper {
+                overflow-x: auto;
+            }
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+            .header {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📋 مدیریت سفارشات</h1>
+            <div>
+                <a href="/admin_dashboard">🏠 داشبورد</a>
+                <a href="/admin_logout" style="margin-right: 12px;">🚪 خروج</a>
+            </div>
+        </div>
+
+        <!-- آمار -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="number">{{ stats.total|default(0) }}</div>
+                <div class="label">مجموع سفارشات</div>
+            </div>
+            <div class="stat-card pending">
+                <div class="number">{{ stats.pending|default(0) }}</div>
+                <div class="label">در انتظار تایید</div>
+            </div>
+            <div class="stat-card completed">
+                <div class="number">{{ stats.completed|default(0) }}</div>
+                <div class="label">تایید شده</div>
+            </div>
+            <div class="stat-card cancelled">
+                <div class="number">{{ stats.cancelled|default(0) }}</div>
+                <div class="label">رد شده</div>
+            </div>
+        </div>
+
+        <!-- جدول سفارشات -->
+        <div class="table-wrapper">
+            {% if orders %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>نام کاربر</th>
+                        <th>شماره کاربر</th>
+                        <th>بسته</th>
+                        <th>اپراتور</th>
+                        <th>قیمت</th>
+                        <th>شماره سفارش</th>
+                        <th>تاریخ</th>
+                        <th>ساعت</th>
+                        <th>وضعیت</th>
+                        <th>عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>{{ order.id }}</td>
+                        <td>{{ order.user_name or order.first_name + ' ' + order.last_name }}</td>
+                        <td>{{ order.user_phone or '' }}</td>
+                        <td>{{ order.package_name }}</td>
+                        <td>{{ order.operator or '-' }}</td>
+                        <td>{{ "{:,.0f}".format(order.price) }} تومان</td>
+                        <td>{{ order.phone_number }}</td>
+                        <td>{{ order.created_at_jalali or '' }}</td>
+                        <td>{{ order.created_at_time or '' }}</td>
+                        <td>
+                            <span class="status-badge {{ order.status }}">
+                                {{ order.status_persian }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if order.status == 'pending' %}
+                            <button class="btn btn-confirm btn-sm" onclick="handleOrder({{ order.id }}, 'confirm')">
+                                ✅ تایید
+                            </button>
+                            <button class="btn btn-reject btn-sm" onclick="handleOrder({{ order.id }}, 'reject')">
+                                ❌ رد
+                            </button>
+                            {% else %}
+                            <span style="color: #6B7280; font-size: 12px;">
+                                {{ 'تایید شده' if order.status == 'completed' else 'رد شده' }}
+                            </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <div class="icon">📭</div>
+                <p>هیچ سفارشی یافت نشد</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        async function handleOrder(orderId, action) {
+            if (!confirm(`آیا از ${action === 'confirm' ? 'تایید' : 'رد'} این سفارش مطمئن هستید؟`)) {
+                return;
+            }
+
+            const buttons = document.querySelectorAll(`button[onclick*="${orderId}"]`);
+            buttons.forEach(btn => btn.disabled = true);
+
+            try {
+                const response = await fetch('/admin_seller', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        order_id: orderId,
+                        action: action
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(result.message);
+                    location.reload();
+                } else {
+                    alert('خطا: ' + (result.message || 'مشخص نیست'));
+                    buttons.forEach(btn => btn.disabled = false);
+                }
+            } catch (error) {
+                alert('خطا در ارتباط با سرور');
+                buttons.forEach(btn => btn.disabled = false);
+            }
+        }
+    </script>
+</body>
+</html>
