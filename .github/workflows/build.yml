@@ -8,10 +8,15 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30  # افزایش زمان timeout
+    timeout-minutes: 30
 
     steps:
     - uses: actions/checkout@v4
+    
+    - name: قبول لایسنس Android SDK
+      run: |
+        yes | sdkmanager --licenses || true
+        yes | sdkmanager "ndk;30.0.14904198" || true
     
     - uses: subosito/flutter-action@v2
       with:
@@ -20,7 +25,7 @@ jobs:
     - name: دریافت وابستگی‌ها
       run: flutter pub get
     
-    - name: ساخت APK (Debug)
+    - name: ساخت APK
       run: flutter build apk --debug --no-tree-shake-icons
     
     - uses: actions/upload-artifact@v4
