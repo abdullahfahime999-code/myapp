@@ -1,6 +1,6 @@
 workflows:
-  android-release:
-    name: Build Android APK
+  android-debug:
+    name: Build Android APK (Debug)
     max_build_duration: 30
     instance_type: mac_mini_m1
     
@@ -12,9 +12,9 @@ workflows:
         script: |
           flutter pub get
       
-      - name: ساخت APK
+      - name: ساخت APK (Debug)
         script: |
-          flutter build apk --release
+          flutter build apk --debug --verbose
     
     artifacts:
       - build/app/outputs/flutter-apk/*.apk
