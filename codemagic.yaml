@@ -5,11 +5,12 @@ workflows:
     instance_type: mac_mini_m1
     
     environment:
-      flutter: 3.24.0
+      flutter: 3.41.2
     
     scripts:
       - name: دریافت وابستگی‌ها
-        script: flutter pub get
+        script: |
+          flutter pub get
       
       - name: ساخت APK
         script: |
@@ -17,3 +18,8 @@ workflows:
     
     artifacts:
       - build/app/outputs/flutter-apk/*.apk
+    
+    publishing:
+      email:
+        recipients:
+          - your-email@gmail.com
