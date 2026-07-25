@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30  # افزایش زمان timeout
 
     steps:
     - uses: actions/checkout@v4
@@ -16,11 +17,13 @@ jobs:
       with:
         flutter-version: '3.41.2'
     
-    - run: flutter pub get
+    - name: دریافت وابستگی‌ها
+      run: flutter pub get
     
-    - run: flutter build apk --release --verbose
+    - name: ساخت APK (Debug)
+      run: flutter build apk --debug --no-tree-shake-icons
     
     - uses: actions/upload-artifact@v4
       with:
-        name: app-release
+        name: app-debug
         path: build/app/outputs/flutter-apk/*.apk
