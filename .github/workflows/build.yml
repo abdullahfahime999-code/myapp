@@ -13,8 +13,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: قبول لایسنس Android SDK
+    - name: Setup Android SDK and accept licenses
       run: |
+        export ANDROID_HOME=/usr/local/lib/android/sdk
+        export PATH=$PATH:$ANDROID_HOME/tools/bin:$ANDROID_HOME/cmdline-tools/latest/bin
         yes | sdkmanager --licenses || true
         yes | sdkmanager "ndk;30.0.14904198" || true
     
